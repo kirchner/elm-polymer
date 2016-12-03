@@ -21,6 +21,12 @@
     <script type="text/javascript" src="elm.js"></script>
     <script type="text/javascript">
       var app = Elm.Main.fullscreen();
+      app.ports.openDrawer.subscribe(function() {
+        document.getElementById('drawer').open();
+      });
+      app.ports.closeDrawer.subscribe(function() {
+        document.getElementById('drawer').close();
+      });
     </script>
   </body>
 </html>
