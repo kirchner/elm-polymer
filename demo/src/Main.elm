@@ -1,17 +1,25 @@
-module Main exposing
-  ( main
-  )
+port module Main exposing (..)
 
 
-import Html exposing
-  ( Html )
 import Html.Attributes
 import Html.Events
+import Html exposing ( Html )
 import Json.Decode as Json
 
 import Polymer.App
-import Polymer.Paper
 import Polymer.Attributes
+import Polymer.Paper
+
+
+port openDrawer : () -> Cmd msg
+port closeDrawer : () -> Cmd msg
+
+
+ports =
+  { openDrawer = openDrawer
+  , closeDrawer = closeDrawer
+  }
+
 
 main =
   Html.program
@@ -22,55 +30,44 @@ main =
     }
 
 
-
 type alias Model =
-  { drawerOpen : Bool
+  { drawerOpened : Bool
   }
+
 
 defaultModel : Model
 defaultModel =
-  { drawerOpen = False
+  { drawerOpened = False
   }
 
 
 type Msg
-  = DrawerToggle
-  | AppDrawerAttached
-  | AppDrawerResetLayout
-  | AppDrawerTransitioned Bool
+  = ToggleDrawer
+
 
 init : (Model, Cmd m)
 init =
-  (defaultModel, Cmd.none)
+  defaultModel ! []
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
+
   case msg of
-    DrawerToggle ->
-      let
-        newModel =
+
+    ToggleDrawer ->
+      if model.drawerOpened then
           { model
-            | drawerOpen = not model.drawerOpen
-          }
-      in
-        (newModel, Cmd.none)
-
-    AppDrawerTransitioned opened ->
-      let
-        newModel =
+            | drawerOpened = False
+          } !
+          [ ports.closeDrawer ()
+          ]
+        else
           { model
-            | drawerOpen = opened
-          }
-      in
-        (newModel, Cmd.none)
-
-    _ ->
-      let
-          _ = Debug.log "msg" msg
-      in
-          model ! []
-
+            | drawerOpened = True
+          } !
+          [ ports.openDrawer ()
+          ]
 
 
 view : Model -> Html Msg
@@ -83,7 +80,7 @@ view model =
       []
       [ Polymer.Paper.iconButton
         [ Polymer.Attributes.icon "menu"
-        , Html.Attributes.attribute "onclick" "document.getElementById('drawer').toggle()"
+        , Html.Events.onClick ToggleDrawer
         ]
         []
       , Html.div
@@ -111,19 +108,13 @@ view model =
         []
       ]
     ]
+  , Html.text (toString model.drawerOpened)
   , let
-      _ = Debug.log "model.drawerOpen" model.drawerOpen
+      _ = Debug.log "model.drawerOpened" model.drawerOpened
     in
       Polymer.App.drawer
       [ Html.Attributes.id "drawer"
-      , Html.Events.on "app-drawer-attached" (Json.succeed AppDrawerAttached)
-      , Html.Events.on "app-drawer-reset-layout" (Json.succeed AppDrawerResetLayout)
-      , Html.Events.on "app-drawer-transitioned" (Json.map AppDrawerTransitioned (Json.at ["target", "opened" ] Json.bool))
       ]
---    ( List.filterMap identity
---      [ Html.Attributes.attribute "opened" "opened"
---        |> if model.drawerOpen then Just else always Nothing
---      ]
---    )
-    []
+      [
+      ]
   ]
