@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+
+    <link rel="import" href="bower_components/paper-item/paper-item.html">
+    <link rel="import" href="bower_components/paper-menu/paper-menu.html">
+  </head>
+  <body>
+    <div id="main"></div>
+    <script type="text/javascript" src="menu.js"></script>
+    <script type="text/javascript">
+      var node = document.getElementById('main');
+      var app = Elm.Main.embed(node);
+
+      document.addEventListener('WebComponentsReady', function() {
+        var menu = document.getElementById('menu');
+
+        menu.addEventListener('iron-select', function() {
+          app.ports.ironSelect.send(menu.selected);
+        }, false);
+      });
+    </script>
+  </body>
+</html>
