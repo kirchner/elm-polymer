@@ -1,0 +1,3 @@
+[submodule "demo/elm-parts"]
+	path = demo/elm-parts
+	url = https://github.com/debois/elm-parts.git
